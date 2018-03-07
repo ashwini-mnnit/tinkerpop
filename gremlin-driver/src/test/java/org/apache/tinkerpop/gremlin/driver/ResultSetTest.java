@@ -55,6 +55,29 @@ public class ResultSetTest extends AbstractResultQueueTest {
     }
 
     @Test
+    public void shouldReturnResponseAttributes() throws Exception {
+        resultQueue.statusAttributes = new HashMap<String,Object>() {{
+            put("test",123);
+            put("junk","here");
+        }};
+
+        final CompletableFuture<Map<String,Object>> attrs = resultSet.statusAttributes();
+        readCompleted.complete(null);
+
+        final Map<String,Object> m = attrs.get();
+        assertEquals(123, m.get("test"));
+        assertEquals("here", m.get("junk"));
+        assertEquals(2, m.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyMapForNoResponseAttributes() throws Exception {
+        final CompletableFuture<Map<String,Object>> attrs = resultSet.statusAttributes();
+        readCompleted.complete(null);
+        assertThat(attrs.get().isEmpty(), is(true));
+    }
+
+    @Test
     public void shouldReturnEmptyMapForNoResponseAttributes() throws Exception {
         final CompletableFuture<Map<String,Object>> attrs = resultSet.statusAttributes();
         readCompleted.complete(null);
